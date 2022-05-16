@@ -9,6 +9,7 @@ output: html_document
 library(dplyr)
 library(knitr)
 library(lubridate)
+library(plyr)
 library(tidyverse)
 
 get_mode <- function(df, column_name) {
@@ -32,9 +33,14 @@ get_measures_for <- function(df, column_name, label) {
 
     mode <- get_mode(df, column_name)
 
-    measures_df <- df %>%
+    measures_df <- df %>% 
+        dplyr::mutate(
+            year_of_birth = plyr::round_any(.data$year_of_birth, 50, f = floor)
+        ) %>%
+        dplyr::group_by(., .data$year_of_birth) %>%
         dplyr::summarize(
             label = label,
+            n = n(),
             mean = mean(.data[[column_name]]),
             median = median(.data[[column_name]]),
             max = max(.data[[column_name]]),
@@ -180,26 +186,34 @@ knitr::kable(
 
 <br />
 
-```{r, echo = FALSE, fig.cap = "Figure 3: Top 10 longest and shortest lived presidents."}
-plot <- ggplot(data = days_lived_data_set, mapping = aes(x = label, y = mean)) + # , y = year_of_birth)) +
+```{r, echo = FALSE, figures-side, fig.show = "hold", out.width = "50%", fig.cap = "Figure 3: Top 10 longest and shortest lived presidents in 50 year intervals."}
+
+plot <- ggplot(data = days_lived_data_set, mapping = aes(x = year_of_birth, y = mean, fill = label, color = label)) + # , y = year_of_birth)) +
     geom_bar(
         stat = "identity",
-        fill = "#DFDFDF",
-        show.legend = FALSE
+        position = position_dodge(),
+        width = 30,
     ) +
     geom_point(
-        show.legend = FALSE
+        show.legend = FALSE,
+        position = position_dodge(30),
     ) +
     geom_errorbar(
         aes(
             ymin = mean - standard_deviation,
             ymax = mean + standard_deviation
         ),
-        color = "red",
-        width = .2,
-        position = position_dodge(.9),
+        color = "black",
+        width = 1,
+        position = position_dodge(30),
     )
 
-plot + labs(title = "Top 10 Longest/Shortest Lived Presidents", x = "Top 10", y = "Days") +
-    theme_classic()
+plot + labs(x = "Top 10", y = "Mean days")
+
+
+count_plot <- ggplot(data = days_lived_data_set, mapping = aes(x = year_of_birth, y = n, fill = label, color = label)) + # , y = year_of_birth)) +
+    geom_smooth(
+        stat = "identity"
+    )
+count_plot + labs(x = "Top 10", y = "Frequency")
 ```

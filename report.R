@@ -1,5 +1,6 @@
 library(dplyr)
 library(lubridate)
+library(plyr)
 library(tidyverse)
 
 get_mode <- function(df, column_name) {
@@ -24,8 +25,13 @@ get_measures_for <- function(df, column_name, label) {
     mode <- get_mode(df, column_name)
 
     measures_df <- df %>%
+        dplyr::mutate(
+            year_of_birth = plyr::round_any(.data$year_of_birth, 50, f = floor)
+        ) %>%
+        dplyr::group_by(., .data$year_of_birth) %>%
         dplyr::summarize(
             label = label,
+            n = n(),
             mean = mean(.data[[column_name]]),
             median = median(.data[[column_name]]),
             max = max(.data[[column_name]]),
@@ -42,7 +48,7 @@ get_weighted_mean <- function(df1, df2) {
     df1_nrow <- nrow(df1)
     df2_nrow <- nrow(df2)
 
-    sum_of_means <- ((df1_nrow * df1$mean) + (df2_nrow * df2$mean))
+    sum_of_means <- (df1_nrow * df1$mean) + (df2_nrow * df2$mean)
     weighted_mean <- sum_of_means / (df1_nrow + df2_nrow)
 
     return(weighted_mean)
@@ -115,30 +121,30 @@ shortest_lived_data_set <- shortest_lived_measures %>%
 days_lived_data_set <- longest_lived_data_set %>%
     rbind(., shortest_lived_data_set)
 
-
-plot <- ggplot(data = days_lived_data_set, mapping = aes(x = label, y = mean)) + # , y = year_of_birth)) +
+plot <- ggplot(data = days_lived_data_set, mapping = aes(x = year_of_birth, y = mean, fill = label, color = label)) + # , y = year_of_birth)) +
     geom_bar(
         stat = "identity",
-        fill = "#DFDFDF",
-        show.legend = FALSE
+        position = position_dodge(),
+        width = 30,
     ) +
     geom_point(
-        show.legend = FALSE
+        show.legend = FALSE,
+        position = position_dodge(30),
     ) +
     geom_errorbar(
         aes(
             ymin = mean - standard_deviation,
             ymax = mean + standard_deviation
         ),
-        color = "red",
-        width = .2,
-        position = position_dodge(.9),
+        color = "black",
+        width = 1,
+        position = position_dodge(30),
     )
 
-plot + labs(title = "Days lived of presidents", x = "Top 10", y = "Days") +
-    theme_classic()
+plot + labs(x = "Top 10", y = "Mean days")
 
-# Review https://r4ds.had.co.nz/r-markdown.html?q=markdown#text-formatting-with-markdown
-# (num in top 10 x mean of top 10) + (num in least 10 x mean of list 10)
-# ----------------------------------------------------------------------
-# (num in top 10) + (num in least 10)
+count_plot <- ggplot(data = days_lived_data_set, mapping = aes(x = year_of_birth, y = n, fill = label, color = label)) + # , y = year_of_birth)) +
+    geom_smooth(
+        stat = "identity"
+    )
+count_plot + labs(x = "Top 10", y = "Frequency")
