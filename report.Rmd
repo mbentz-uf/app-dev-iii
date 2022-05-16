@@ -40,13 +40,13 @@ get_measures_for <- function(df, column_name, label) {
         dplyr::group_by(., .data$year_of_birth) %>%
         dplyr::summarize(
             label = label,
-            n = n(),
+            frequency = n(),
             mean = mean(.data[[column_name]]),
             median = median(.data[[column_name]]),
             max = max(.data[[column_name]]),
             min = min(.data[[column_name]]),
-            standard_deviation = sd(.data[[column_name]])
-            # sd2 = sqrt(sum((.data[[column_name]] - mean(.data[[column_name]]))^2 / (nrow - 1)))
+            #standard_deviation = sd(.data[[column_name]])
+            standard_deviation = sqrt(sum((.data[[column_name]] - mean(.data[[column_name]]))^2 / (nrow - 1)))
         ) %>%
         cbind(., mode)
 
@@ -100,8 +100,9 @@ days_lived_presidents <- cleaned_presidents %>%
 
 <br />
 
-To keep the integrity of the analysis currently living presidents were exlucded in the following report. The imported data of USA presidents birth date and death date. 1800s has the largest concentration of shortest lived presidents and that the 1700s and 1900s have the largest concentration of longest lived presidents.
+To maintain data integrity, currently living presidents have been excluded in the following report. This report showcases the top 10 longest lived presidents, and the top 10 shortest lived presidents, measured in days. The 1800s has the highest concentration of shortest lived presidents and that 1700s and 1900s have the highest concentration of longest lived presidents. These findings are demonstrated in [Figure 3](#analysis).
 
+<br />
 
 ## Top 10
 
@@ -155,9 +156,10 @@ top_10_shortest_plot <- ggplot(data = shortest_lived_presidents, mapping = aes(x
 ```
 
 <br />
-<br />
 
 ## Analysis
+The birth year was rounded down to reduce noise. Rounding down to the nearest 50 year interval struck the best balance between data point volume and visual clarity.  At first glance, the left plot of Figure 3 might give the impression that shortest lived presidents are almost evenly distributed from 1750 to 1900. However, looking more closely we notice that both have a standard deviation of 0 because only a single entry exists. This is verified by the plot to the right. 
+
 
 ```{r, echo = FALSE}
 longest_lived_measures <- get_measures_for(longest_lived_presidents, "lived_days", "longest_lived")
@@ -180,13 +182,13 @@ days_lived_data_set <- longest_lived_data_set %>%
 knitr::kable(
     days_lived_data_set, 
     col.names = gsub("[.]", " ", names(days_lived_data_set)),
-    caption = "Table 3: The mean, median, max, min, standard deviation, mode, and weighted mean of the top 10 longest and shortest days lived"
+    caption = "Table 3: The frequency, mean, median, max, min, standard deviation, mode, and weighted mean of the top 10 longest and shortest days lived"
 )
 ```
 
 <br />
 
-```{r, echo = FALSE, figures-side, fig.show = "hold", out.width = "50%", fig.cap = "Figure 3: Top 10 longest and shortest lived presidents in 50 year intervals."}
+```{r, echo = FALSE, figures-side, fig.show = "hold", out.width = "51%", fig.cap = "Figure 3: Top 10 longest and shortest lived presidents rounded down to the nearest 50 year interval. The concentration of longest lived days is highest during the 1701 and 1900's, whereas the concentration of shortest lived days is highest during the 1801's."}
 
 plot <- ggplot(data = days_lived_data_set, mapping = aes(x = year_of_birth, y = mean, fill = label, color = label)) + # , y = year_of_birth)) +
     geom_bar(
@@ -211,9 +213,14 @@ plot <- ggplot(data = days_lived_data_set, mapping = aes(x = year_of_birth, y = 
 plot + labs(x = "Top 10", y = "Mean days")
 
 
-count_plot <- ggplot(data = days_lived_data_set, mapping = aes(x = year_of_birth, y = n, fill = label, color = label)) + # , y = year_of_birth)) +
+count_plot <- ggplot(data = days_lived_data_set, mapping = aes(x = year_of_birth, y = frequency, fill = label, color = label)) + # , y = year_of_birth)) +
     geom_smooth(
         stat = "identity"
     )
 count_plot + labs(x = "Top 10", y = "Frequency")
 ```
+
+<br />
+
+### Conclusion
+We can clearly see that there is a correlation between presidents born in the 1800's and being listed in the top 10 shortest lived. 80% (8 out of 10) of presidents that are in the 10 top shortest lived were born during the 1800's. Whereas, 80% of presidents born in the 1700 and 1900s are listed in the top 10 longest lived.
