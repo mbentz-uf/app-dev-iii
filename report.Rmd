@@ -2,7 +2,7 @@
 title: "Top 10 Longest and Shortest Lived Presidents"
 author: Michael Bentz
 date: 2022-05-16
-output: html_document
+output: html_document, pdf
 ---
 
 ```{r setup, include = FALSE}
@@ -100,7 +100,7 @@ days_lived_presidents <- cleaned_presidents %>%
 
 <br />
 
-To maintain data integrity, currently living presidents have been excluded in the following report. This report showcases the top 10 longest lived presidents, and the top 10 shortest lived presidents, measured in days. The 1800s has the highest concentration of shortest lived presidents and that 1700s and 1900s have the highest concentration of longest lived presidents. These findings are demonstrated in [Figure 3](#analysis).
+To maintain data integrity, currently living presidents have been excluded in the following report. This report showcases the top 10 longest lived presidents, and the top 10 shortest lived presidents, measured in days. The 1800s has the highest concentration of shortest lived presidents and the 1700 and 1900s have the highest concentration of longest lived presidents. These findings are demonstrated in [Figure 3](#analysis).
 
 <br />
 
@@ -223,4 +223,4 @@ count_plot + labs(x = "Top 10", y = "Frequency")
 <br />
 
 ### Conclusion
-We can clearly see that there is a correlation between presidents born in the 1800's and being listed in the top 10 shortest lived. 80% (8 out of 10) of presidents that are in the 10 top shortest lived were born during the 1800's. Whereas, 80% of presidents born in the 1700 and 1900s are listed in the top 10 longest lived.
+We can clearly see that there is a correlation between presidents born in the 1800's and being listed in the top 10 shortest lived. 80% (8 out of 10) of presidents that are in the 10 top shortest lived were born during the 1800's. Also, 80% of presidents born in the 1700 and 1900s are listed in the top 10 longest lived.
